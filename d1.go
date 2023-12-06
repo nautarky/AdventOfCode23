@@ -21,12 +21,6 @@ var atoiMap = map[string]int{
 	"nine":  9,
 }
 
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 // Returns value, index
 func getLeftPart1(line string) (int, int) {
 	for pos, char := range line {
