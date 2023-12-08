@@ -21,13 +21,22 @@ func d3() (int, int) {
 		schematic = append(schematic, []rune(s.Text()))
 	}
 
-	sum := 0
-	for i := 0; i < len(schematic); i++ {
-		for j := 0; j < len(schematic[i]); j++ {
-			if unicode.IsDigit(schematic[i][j]) {
-				number, leftBound, rightBound, _ := findNumberFromPoint(schematic, i, j)
+	solution := &d3Solution{schematic}
+	return solution.part1(), 0
+}
 
-				if isSymbolAdjacentToRange(schematic, i, leftBound, rightBound) {
+type d3Solution struct {
+	schematic [][]rune
+}
+
+func (s *d3Solution) part1() int {
+	sum := 0
+	for i := 0; i < len(s.schematic); i++ {
+		for j := 0; j < len(s.schematic[i]); j++ {
+			if unicode.IsDigit(s.schematic[i][j]) {
+				number, leftBound, rightBound, _ := s.findNumberFromPoint(i, j)
+
+				if s.isSymbolAdjacentToRange(i, leftBound, rightBound) {
 					sum += number
 				}
 
@@ -36,36 +45,36 @@ func d3() (int, int) {
 		}
 	}
 
-	return sum, 0
+	return sum
 }
 
 // Returns parsed number, left bound, right bound, error msg
-func findNumberFromPoint(schematic [][]rune, row, col int) (int, int, int, error) {
-	if row < 0 || row >= len(schematic) || col < 0 || col >= len(schematic[row]) {
+func (s *d3Solution) findNumberFromPoint(row, col int) (int, int, int, error) {
+	if row < 0 || row >= len(s.schematic) || col < 0 || col >= len(s.schematic[row]) {
 		return 0, 0, 0, errors.New("point is out of bounds")
 	}
 
-	if !unicode.IsDigit(schematic[row][col]) {
+	if !unicode.IsDigit(s.schematic[row][col]) {
 		return 0, 0, 0, errors.New("point is not a digit")
 	}
 
 	l, r := col, col
-	for l > 0 && unicode.IsDigit(schematic[row][l-1]) {
+	for l > 0 && unicode.IsDigit(s.schematic[row][l-1]) {
 		l--
 	}
 
-	for r < len(schematic[row])-1 && unicode.IsDigit(schematic[row][r+1]) {
+	for r < len(s.schematic[row])-1 && unicode.IsDigit(s.schematic[row][r+1]) {
 		r++
 	}
 
-	res, err := strconv.Atoi(string(schematic[row][l : r+1]))
+	res, err := strconv.Atoi(string(s.schematic[row][l : r+1]))
 	return res, l, r, err
 }
 
-func isSymbolAdjacentToRange(schematic [][]rune, row, first, last int) bool {
-	for i := max(row-1, 0); i < min(row+2, len(schematic)); i++ {
-		for j := max(first-1, 0); j < min(last+2, len(schematic[i])); j++ {
-			r := schematic[i][j]
+func (s *d3Solution) isSymbolAdjacentToRange(row, first, last int) bool {
+	for i := max(row-1, 0); i < min(row+2, len(s.schematic)); i++ {
+		for j := max(first-1, 0); j < min(last+2, len(s.schematic[i])); j++ {
+			r := s.schematic[i][j]
 			if !unicode.IsDigit(r) && r != '.' {
 				return true
 			}
