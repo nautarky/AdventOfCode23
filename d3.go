@@ -8,12 +8,13 @@ import (
 	"unicode"
 )
 
-const d3InputPath = "input/3.txt"
+type d3 struct {
+	schematic [][]rune
+}
 
-func d3() (int, int) {
-	f, err := os.Open(d3InputPath)
+func newD3(path string) *d3 {
+	f, err := os.Open(path)
 	check(err)
-	defer f.Close()
 
 	s := bufio.NewScanner(f)
 	schematic := make([][]rune, 0)
@@ -21,15 +22,13 @@ func d3() (int, int) {
 		schematic = append(schematic, []rune(s.Text()))
 	}
 
-	solution := &d3Solution{schematic}
-	return solution.part1(), solution.part2()
+	err = f.Close()
+	check(err)
+
+	return &d3{schematic}
 }
 
-type d3Solution struct {
-	schematic [][]rune
-}
-
-func (s *d3Solution) part1() int {
+func (s *d3) part1() int {
 	sum := 0
 	for i := 0; i < len(s.schematic); i++ {
 		for j := 0; j < len(s.schematic[i]); j++ {
@@ -48,7 +47,7 @@ func (s *d3Solution) part1() int {
 	return sum
 }
 
-func (s *d3Solution) part2() int {
+func (s *d3) part2() int {
 	sum := 0
 
 	for i := 0; i < len(s.schematic); i++ {
@@ -65,7 +64,7 @@ func (s *d3Solution) part2() int {
 	return sum
 }
 
-func (s *d3Solution) findAdjacentNumbers(i, j int) []int {
+func (s *d3) findAdjacentNumbers(i, j int) []int {
 	nums := make([]int, 0)
 
 	for row := max(i-1, 0); row < min(i+2, len(s.schematic)); row++ {
@@ -82,7 +81,7 @@ func (s *d3Solution) findAdjacentNumbers(i, j int) []int {
 }
 
 // Returns parsed number, left bound, right bound, error msg
-func (s *d3Solution) findNumberFromPoint(row, col int) (int, int, int, error) {
+func (s *d3) findNumberFromPoint(row, col int) (int, int, int, error) {
 	if row < 0 || row >= len(s.schematic) || col < 0 || col >= len(s.schematic[row]) {
 		return 0, 0, 0, errors.New("point is out of bounds")
 	}
@@ -104,7 +103,7 @@ func (s *d3Solution) findNumberFromPoint(row, col int) (int, int, int, error) {
 	return res, l, r, err
 }
 
-func (s *d3Solution) isSymbolAdjacentToRange(row, first, last int) bool {
+func (s *d3) isSymbolAdjacentToRange(row, first, last int) bool {
 	for i := max(row-1, 0); i < min(row+2, len(s.schematic)); i++ {
 		for j := max(first-1, 0); j < min(last+2, len(s.schematic[i])); j++ {
 			r := s.schematic[i][j]

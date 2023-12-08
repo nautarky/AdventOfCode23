@@ -17,7 +17,7 @@ func main() {
 	fmt.Printf("d2p1: %d\n", d2p1)
 	fmt.Printf("d2p2: %d\n", d2p2)
 
-	d3p1, d3p2 := d3()
-	fmt.Printf("d3p1: %d\n", d3p1)
-	fmt.Printf("d3p2: %d\n", d3p2)
+	day3 := newD3("input/3.txt")
+	fmt.Printf("d3p1: %d\n", day3.part1())
+	fmt.Printf("d3p2: %d\n", day3.part2())
 }
