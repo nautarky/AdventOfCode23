@@ -16,4 +16,8 @@ func main() {
 	d2p1, d2p2 := d2()
 	fmt.Printf("d2p1: %d\n", d2p1)
 	fmt.Printf("d2p2: %d\n", d2p2)
+
+	d3p1, d3p2 := d3()
+	fmt.Printf("d3p1: %d\n", d3p1)
+	fmt.Printf("d3p2: %d\n", d3p2)
 }
