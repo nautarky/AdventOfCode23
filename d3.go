@@ -22,7 +22,7 @@ func d3() (int, int) {
 	}
 
 	solution := &d3Solution{schematic}
-	return solution.part1(), 0
+	return solution.part1(), solution.part2()
 }
 
 type d3Solution struct {
@@ -46,6 +46,39 @@ func (s *d3Solution) part1() int {
 	}
 
 	return sum
+}
+
+func (s *d3Solution) part2() int {
+	sum := 0
+
+	for i := 0; i < len(s.schematic); i++ {
+		for j := 0; j < len(s.schematic[i]); j++ {
+			if s.schematic[i][j] == '*' {
+				nums := s.findAdjacentNumbers(i, j)
+				if len(nums) == 2 {
+					sum += nums[0] * nums[1]
+				}
+			}
+		}
+	}
+
+	return sum
+}
+
+func (s *d3Solution) findAdjacentNumbers(i, j int) []int {
+	nums := make([]int, 0)
+
+	for row := max(i-1, 0); row < min(i+2, len(s.schematic)); row++ {
+		for col := max(j-1, 0); col < min(j+2, len(s.schematic[i])); col++ {
+			if unicode.IsDigit(s.schematic[row][col]) {
+				num, _, rightBound, _ := s.findNumberFromPoint(row, col)
+				nums = append(nums, num)
+				col = rightBound
+			}
+		}
+	}
+
+	return nums
 }
 
 // Returns parsed number, left bound, right bound, error msg
