@@ -2,14 +2,22 @@ package main
 
 import (
 	"bufio"
+	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
 
+type almanacRange struct {
+	src  int64
+	dest int64
+	size int64
+}
+
 type d5 struct {
 	seeds []int64
-	maps  [][][3]int64
+	maps  [][]almanacRange
 }
 
 func newD5(path string) *d5 {
@@ -26,13 +34,14 @@ func newD5(path string) *d5 {
 		seeds = append(seeds, id)
 	}
 
-	maps := make([][][3]int64, 0)
+	maps := make([][]almanacRange, 0)
+
 	for s.Scan() {
 		val := s.Text()
 
 		// Title line
 		if val == "" {
-			maps = append(maps, make([][3]int64, 0))
+			maps = append(maps, make([]almanacRange, 0))
 			s.Scan()
 			continue
 		}
@@ -41,41 +50,108 @@ func newD5(path string) *d5 {
 		dest, _ := strconv.ParseInt(rawMap[0], 10, 64)
 		source, _ := strconv.ParseInt(rawMap[1], 10, 64)
 		size, _ := strconv.ParseInt(rawMap[2], 10, 64)
-		maps[len(maps)-1] = append(maps[len(maps)-1], [3]int64{dest, source, size})
+		maps[len(maps)-1] = append(maps[len(maps)-1], almanacRange{source, dest, size})
 	}
 
 	err = file.Close()
 	check(err)
 
+	for _, m := range maps {
+		sort.Sort(ByDestination(m))
+	}
+
 	return &d5{seeds, maps}
 }
 
+type ByDestination []almanacRange
+
+func (d ByDestination) Len() int           { return len(d) }
+func (d ByDestination) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
+func (d ByDestination) Less(i, j int) bool { return d[i].dest < d[j].dest }
+
 func (d *d5) part1() int64 {
-	locations := make([]int64, 0)
+	var lowest int64 = math.MaxInt64
 
 	for _, seed := range d.seeds {
 		for _, m := range d.maps {
-			seed = mapValue(seed, m)
+			seed = lookup(seed, m)
 		}
 
-		locations = append(locations, seed)
-	}
-
-	lowest := locations[0]
-	for _, l := range locations[1:] {
-		lowest = min(lowest, l)
+		lowest = min(lowest, seed)
 	}
 
 	return lowest
 }
 
-func mapValue(value int64, m [][3]int64) int64 {
-	for _, r := range m {
-		if value >= r[1] && value <= r[1]+r[2] {
-			offset := value - r[1]
-			return r[0] + offset
+func (d *d5) part2() int64 {
+	locationLevel := len(d.maps) - 1
+
+	for i := int64(1); i < d.maps[locationLevel][0].dest; i++ {
+		if d.leadsToSeed(i, locationLevel) {
+			return i
 		}
 	}
 
-	return value
+	for _, r := range d.maps[locationLevel] {
+		for i := r.dest; i < r.dest+r.size; i++ {
+			if d.leadsToSeed(i, locationLevel) {
+				return i
+			}
+		}
+	}
+
+	return -1
+}
+
+// level: current position in map array
+func (d *d5) leadsToSeed(dest int64, level int) bool {
+	src := dest
+
+	// find range at this level that contains dest
+	for _, r := range d.maps[level] {
+		if isDestInRange(dest, r) {
+			src = reverseLookup(dest, r)
+		}
+	}
+
+	// exit: does this range lead to a seed?
+	if level == 0 {
+		return d.isValidSeed(src)
+	}
+
+	return d.leadsToSeed(src, level-1)
+}
+
+func (d *d5) isValidSeed(seed int64) bool {
+	for i := 0; i < len(d.seeds); i += 2 {
+		if seed >= d.seeds[i] && seed < d.seeds[i]+d.seeds[i+1] {
+			return true
+		}
+	}
+
+	return false
+}
+
+func lookup(src int64, m []almanacRange) int64 {
+	for _, r := range m {
+		if src >= r.src && src <= r.src+r.size {
+			offset := src - r.src
+			return r.dest + offset
+		}
+	}
+
+	return src
+}
+
+func reverseLookup(dest int64, r almanacRange) int64 {
+	if isDestInRange(dest, r) {
+		offset := dest - r.dest
+		return r.src + offset
+	}
+
+	return dest
+}
+
+func isDestInRange(dest int64, r almanacRange) bool {
+	return dest >= r.dest && dest <= r.dest+r.size
 }
