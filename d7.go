@@ -34,6 +34,7 @@ type d7 struct {
 func newD7(path string) *d7 {
 	file, err := os.Open(path)
 	check(err)
+	defer file.Close()
 
 	handsP1 := make([]hand, 0)
 	handsP2 := make([]hand, 0)
