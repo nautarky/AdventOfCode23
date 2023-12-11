@@ -35,9 +35,31 @@ func newD8(path string) *d8 {
 
 func (d *d8) part1() int {
 	cur := "AAA"
+	stopCond := func(s string) bool {
+		return s == "ZZZ"
+	}
+	return d.findCycleLen(cur, stopCond)
+}
+
+func (d *d8) part2() int {
+	curNodes := d.findStartNodes()
+	cycles := make([]int, 0)
+	stopCond := func(s string) bool {
+		return s[len(s)-1] == 'Z'
+	}
+
+	for _, n := range curNodes {
+		cycles = append(cycles, d.findCycleLen(n, stopCond))
+	}
+
+	return LCM(cycles[0], cycles[1], cycles[2:]...)
+}
+
+func (d *d8) findCycleLen(node string, stopCond func(string) bool) int {
+	cur := node
 
 	for steps := 0; ; steps++ {
-		if cur == "ZZZ" {
+		if stopCond(cur) {
 			return steps
 		}
 
@@ -49,4 +71,16 @@ func (d *d8) part1() int {
 			cur = d.network[cur][1]
 		}
 	}
+}
+
+func (d *d8) findStartNodes() []string {
+	nodes := make([]string, 0)
+
+	for k := range d.network {
+		if k[len(k)-1] == 'A' {
+			nodes = append(nodes, k)
+		}
+	}
+
+	return nodes
 }
