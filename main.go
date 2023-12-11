@@ -33,4 +33,7 @@ func main() {
 	day6 := newD6("input/6.txt")
 	fmt.Printf("d6p1: %d\n", day6.part1())
 	fmt.Printf("d6p2: %d\n", day6.part2())
+
+	day7 := newD7("input/7.txt")
+	fmt.Printf("d7p1: %d\n", day7.part1())
 }
