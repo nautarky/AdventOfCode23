@@ -27,67 +27,73 @@ type hand struct {
 }
 
 type d7 struct {
-	cardScores map[rune]int
-	hands      []hand
+	handsP1 []hand
+	handsP2 []hand
 }
 
 func newD7(path string) *d7 {
 	file, err := os.Open(path)
 	check(err)
 
-	hands := make([]hand, 0)
+	handsP1 := make([]hand, 0)
+	handsP2 := make([]hand, 0)
 	s := bufio.NewScanner(file)
 
-	cardScores := map[rune]int{
-		'A': 14,
-		'K': 13,
-		'Q': 12,
-		'J': 11,
-		'T': 10,
-		'9': 9,
-		'8': 8,
-		'7': 7,
-		'6': 6,
-		'5': 5,
-		'4': 4,
-		'3': 3,
-		'2': 2,
-	}
-
-	day7 := d7{cardScores, hands}
+	cardScoresP1 := map[rune]int{'A': 14, 'K': 13, 'Q': 12, 'J': 11, 'T': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2}
+	cardScoresP2 := map[rune]int{'A': 14, 'K': 13, 'Q': 12, 'J': 1, 'T': 10, '9': 9, '8': 8, '7': 7, '6': 6, '5': 5, '4': 4, '3': 3, '2': 2}
 
 	for s.Scan() {
-		day7.hands = append(day7.hands, day7.buildHand(s.Text()))
+		cardStr := s.Text()
+		handsP1 = append(handsP1, buildHand(cardStr, cardScoresP1))
+		handsP2 = append(handsP2, buildHand(cardStr, cardScoresP2))
 	}
 
-	sort.Sort(byWeakestHands(day7.hands))
-	return &day7
+	sort.Sort(byWeakestHands(handsP1))
+	sort.Sort(byWeakestHands(handsP2))
+
+	return &d7{handsP1, handsP2}
 }
 
 func (d *d7) part1() int {
 	score := 0
 
-	for i, h := range d.hands {
+	for i, h := range d.handsP1 {
 		score += (i + 1) * h.bid
 	}
 
 	return score
 }
 
-func (d *d7) buildHand(s string) hand {
-	parts := strings.Fields(s)
+func (d *d7) part2() int {
+	score := 0
 
-	cards := make([]int, 0)
-	for _, c := range parts[0] {
-		cards = append(cards, d.cardScores[c])
+	for i, h := range d.handsP2 {
+		score += (i + 1) * h.bid
 	}
 
-	typ := scoreHand(cards)
+	return score
+}
+
+func buildHand(s string, cardScores map[rune]int) hand {
+	parts := strings.Fields(s)
+	cards := make([]int, 0)
+
+	for _, c := range parts[0] {
+		cards = append(cards, cardScores[c])
+	}
+
+	var typ handType
+	if cardScores['J'] == 11 {
+		typ = scoreHandP1(cards)
+	} else {
+		typ = scoreHandP2(cards)
+	}
+
 	bid, _ := strconv.Atoi(parts[1])
 	return hand{cards, typ, bid}
 }
 
-func scoreHand(cards []int) handType {
+func scoreHandP1(cards []int) handType {
 	cardToCount := make(map[int]int)
 
 	for _, c := range cards {
@@ -95,37 +101,75 @@ func scoreHand(cards []int) handType {
 	}
 
 	counts := make([]int, 0)
-	for _, c := range cardToCount {
-		counts = append(counts, c)
+	for _, v := range cardToCount {
+		counts = append(counts, v)
 	}
 
 	sort.Sort(sort.Reverse(sort.IntSlice(counts)))
 
-	if counts[0] == 1 {
-		return highCard
+	mostCards := counts[0]
+	secondmostCards := 0
+	if len(counts) > 1 {
+		secondmostCards += counts[1]
 	}
 
-	if counts[0] == 2 {
-		if counts[1] == 1 {
-			return onePair
+	return scoreHandInner(mostCards, secondmostCards)
+}
+
+func scoreHandP2(cards []int) handType {
+	cardToCount := make(map[int]int)
+
+	for _, c := range cards {
+		cardToCount[c] += 1
+	}
+
+	counts := make([]int, 0)
+	for k, v := range cardToCount {
+		if k == 1 {
+			continue
 		}
-
-		return twoPair
+		counts = append(counts, v)
 	}
 
-	if counts[0] == 3 {
-		if counts[1] == 1 {
-			return threeOfAKind
-		}
+	sort.Sort(sort.Reverse(sort.IntSlice(counts)))
 
-		return fullHouse
+	mostCards := cardToCount[1]
+	if len(counts) > 0 {
+		mostCards += counts[0]
 	}
 
-	if counts[0] == 4 {
+	secondmostCards := 0
+	if len(counts) > 1 {
+		secondmostCards += counts[1]
+	}
+
+	return scoreHandInner(mostCards, secondmostCards)
+}
+
+func scoreHandInner(mostCards, secondmostCards int) handType {
+	if mostCards == 5 {
+		return fiveOfAKind
+	}
+
+	if mostCards == 4 {
 		return fourOfAKind
 	}
 
-	return fiveOfAKind
+	if mostCards == 3 {
+		if secondmostCards == 1 {
+			return threeOfAKind
+		}
+		return fullHouse
+	}
+
+	if mostCards == 2 {
+		if secondmostCards == 1 {
+			return onePair
+		}
+		return twoPair
+	}
+
+	return highCard
 }
 
 type byWeakestHands []hand
