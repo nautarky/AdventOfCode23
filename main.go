@@ -27,5 +27,10 @@ func main() {
 
 	day5 := newD5("input/5.txt")
 	fmt.Printf("d5p1: %d\n", day5.part1())
-	fmt.Printf("d5p2: %d\n", day5.part2())
+	//fmt.Printf("d5p2: %d\n", day5.part2())
+	fmt.Printf("d5p2: omitted\n")
+
+	day6 := newD6("input/6.txt")
+	fmt.Printf("d6p1: %d\n", day6.part1())
+	fmt.Printf("d6p2: %d\n", day6.part2())
 }
