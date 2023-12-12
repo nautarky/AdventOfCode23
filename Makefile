@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := run
 
-sources := main.go helpers.go d1.go d2.go d3.go d4.go d5.go d6.go d7.go d8.go
+sources := main.go helpers.go d1.go d2.go d3.go d4.go d5.go d6.go d7.go d8.go d9.go
 
 fmt:
 	go fmt ./...
