@@ -19,7 +19,14 @@ func Part1(lines []string) int {
 }
 
 func Part2(lines []string) int {
-	return 0
+	sum := 0
+
+	for _, line := range lines {
+		g := buildGame(line)
+		sum += g["red"] * g["blue"] * g["green"]
+	}
+
+	return sum
 }
 
 // stores a game's minimum cube count by color
