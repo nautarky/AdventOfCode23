@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := run
 
-sources := advent.go helpers.go
+sources := advent.go
 
 fmt:
 	go fmt ./...

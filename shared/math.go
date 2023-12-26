@@ -1,4 +1,4 @@
-package main
+package shared
 
 func GCD(a, b int) int {
 	for b != 0 {
