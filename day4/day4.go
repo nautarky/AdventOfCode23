@@ -1,6 +1,7 @@
 package day4
 
 import (
+	"math"
 	"strings"
 )
 
@@ -8,17 +9,35 @@ func Part1(lines []string) int {
 	sum := 0
 
 	for _, line := range lines {
-		sum += scoreCard(line)
+		sum += score(countMatches(line))
 	}
 
 	return sum
 }
 
 func Part2(lines []string) int {
-	return 0
+	copies := make([]int, len(lines))
+	for i := 0; i < len(copies); i++ {
+		copies[i] = 1
+	}
+
+	for i, line := range lines {
+		matches := countMatches(line)
+
+		for j := i + 1; j-i <= matches; j++ {
+			copies[j] += copies[i]
+		}
+	}
+
+	sum := 0
+	for _, count := range copies {
+		sum += count
+	}
+
+	return sum
 }
 
-func scoreCard(line string) int {
+func countMatches(line string) int {
 	parts := strings.Fields(line)
 	winningNums := make(map[string]bool, 10)
 
@@ -27,14 +46,22 @@ func scoreCard(line string) int {
 		winningNums[parts[i]] = true
 	}
 
-	score := 0
+	matches := 0
 
 	i++ // skip '|'
 	for ; i < len(parts); i++ {
 		if winningNums[parts[i]] {
-			score = max(1, score*2)
+			matches++
 		}
 	}
 
-	return score
+	return matches
+}
+
+func score(matches int) int {
+	if matches == 0 {
+		return 0
+	}
+
+	return int(math.Exp2(float64(matches - 1)))
 }
