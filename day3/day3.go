@@ -21,7 +21,42 @@ func Part1(lines []string) int {
 }
 
 func Part2(lines []string) int {
-	return 0
+	sum := 0
+
+	for row, line := range lines {
+		for col := 0; col < len(line); col++ {
+			if line[col] == '*' {
+				adjacentNums := getAdjacentNumbers(lines, row, col)
+
+				if len(adjacentNums) == 2 {
+					sum += adjacentNums[0] * adjacentNums[1]
+				}
+			}
+		}
+	}
+
+	return sum
+}
+
+func getAdjacentNumbers(lines []string, row, col int) []int {
+	nums := make([]int, 0)
+
+	for i := max(row-1, 0); i < min(row+2, len(lines)); i++ {
+		for j := max(col-1, 0); j < min(col+2, len(lines[i])); j++ {
+			num, size := getNumberAt(lines[i], j)
+
+			if size > 0 {
+				nums = append(nums, num)
+			}
+
+			// advance past current number, if one exists
+			for j < len(lines[i]) && lines[i][j] >= '0' && lines[i][j] <= '9' {
+				j++
+			}
+		}
+	}
+
+	return nums
 }
 
 // will grow to the left. returns the value and length. returns (0, 0) for non-numeric positions.
