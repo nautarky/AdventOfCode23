@@ -12,7 +12,7 @@ func Check(e error) {
 	}
 }
 
-// reads puzzle input into a string slice
+// ReadFile reads puzzle input into a string slice
 func ReadFile(path string) []string {
 	f, err := os.Open(path)
 	Check(err)
@@ -30,7 +30,7 @@ func ReadFile(path string) []string {
 	return lines
 }
 
-// converts rune to its numeric value
+// RuneToInt converts rune to its numeric value
 func RuneToInt(r rune) (int, error) {
 	if r < '0' || r > '9' {
 		return 0, fmt.Errorf("rune is non-numeric")
