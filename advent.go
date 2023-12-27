@@ -5,6 +5,7 @@ import (
 	"Advent23/day2"
 	"Advent23/day3"
 	"Advent23/day4"
+	"Advent23/day5"
 	"Advent23/shared"
 	"fmt"
 )
@@ -14,6 +15,7 @@ func main() {
 	printOutput("input/2.txt", day2.Part1, day2.Part2, 2)
 	printOutput("input/3.txt", day3.Part1, day3.Part2, 3)
 	printOutput("input/4.txt", day4.Part1, day4.Part2, 4)
+	printOutput("input/5.txt", day5.Part1, day5.Part2, 5)
 }
 
 type solution func([]string) int
