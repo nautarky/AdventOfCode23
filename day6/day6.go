@@ -21,7 +21,7 @@ func Part1(lines []string) int {
 	product := 1
 
 	for _, r := range races {
-		product *= minQuad(r)
+		product *= minWays(r)
 	}
 
 	return product
@@ -34,7 +34,7 @@ func Part2(lines []string) int {
 	t, _ := strconv.Atoi(strings.Join(timeParts[1:], ""))
 	d, _ := strconv.Atoi(strings.Join(distParts[1:], ""))
 
-	return minQuad(race{t, d})
+	return minWays(race{t, d})
 }
 
 type race struct {
@@ -42,7 +42,7 @@ type race struct {
 	distance int
 }
 
-func minQuad(r race) int {
+func minWays(r race) int {
 	a, b := shared.QuadraticFormula(-1.0, float64(r.time), float64(-r.distance))
 
 	lo := math.Ceil(min(a, b) + 0.0000000001)
