@@ -1,5 +1,7 @@
 package shared
 
+import "math"
+
 func GCD(a, b int) int {
 	for b != 0 {
 		t := b
@@ -17,4 +19,10 @@ func LCM(a, b int, integers ...int) int {
 	}
 
 	return result
+}
+
+func QuadraticFormula(a, b, c float64) (float64, float64) {
+	plus := (-b + math.Sqrt(b*b-4*a*c)) / (2 * a)
+	minus := (-b - math.Sqrt(b*b-4*a*c)) / (2 * a)
+	return plus, minus
 }
