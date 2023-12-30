@@ -9,21 +9,18 @@ import (
 )
 
 func Part1(lines []string) int {
-	sum := 0
-
-	for _, line := range lines {
-		rs := newRowSolver(line, 1)
-		sum += rs.countArrangements(0, 0, 0, '.')
-	}
-
-	return sum
+	return solve(lines, 1)
 }
 
 func Part2(lines []string) int {
+	return solve(lines, 5)
+}
+
+func solve(lines []string, repeat int) int {
 	sum := 0
 
 	for _, line := range lines {
-		rs := newRowSolver(line, 5)
+		rs := newRowSolver(line, repeat)
 		sum += rs.countArrangements(0, 0, 0, '.')
 	}
 
@@ -84,24 +81,24 @@ func (rs *rowSolver) countArrangements(i, group, run int, prev byte) int {
 	}
 
 	b := rs.row[i]
-	if b == '.' && prev == '#' && run != rs.groups[group] {
-		return 0
-	} else if b == '.' && prev == '#' {
-		res := rs.countArrangements(i+1, group+1, 0, '.')
-		rs.memo[key] = res
-		return res
-	} else if b == '.' && prev == '.' {
-		res := rs.countArrangements(i+1, group, 0, '.')
-		rs.memo[key] = res
-		return res
-	} else if b == '#' {
-		res := rs.countArrangements(i+1, group, run+1, '#')
+	var res int
+
+	if b != '?' {
+		if b == '.' && prev == '#' && run != rs.groups[group] {
+			res = 0
+		} else if b == '.' && prev == '#' {
+			res = rs.countArrangements(i+1, group+1, 0, '.')
+		} else if b == '.' && prev == '.' {
+			res = rs.countArrangements(i+1, group, 0, '.')
+		} else if b == '#' {
+			res = rs.countArrangements(i+1, group, run+1, '#')
+		}
+
 		rs.memo[key] = res
 		return res
 	}
 
 	// b == '?', so do both
-	res := 0
 	rs.row[i] = '.'
 	res += rs.countArrangements(i, group, run, prev)
 	rs.row[i] = '#'
