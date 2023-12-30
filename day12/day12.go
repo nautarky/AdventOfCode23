@@ -11,7 +11,7 @@ func Part1(lines []string) int {
 	sum := 0
 
 	for _, line := range lines {
-		rs := newRowSolver(line)
+		rs := newRowSolver(line, 1)
 		sum += rs.countArrangements(0)
 	}
 
@@ -19,7 +19,14 @@ func Part1(lines []string) int {
 }
 
 func Part2(lines []string) int {
-	return 0
+	sum := 0
+
+	for _, line := range lines {
+		rs := newRowSolver(line, 5)
+		sum += rs.countArrangements(0)
+	}
+
+	return sum
 }
 
 type rowSolver struct {
@@ -28,10 +35,10 @@ type rowSolver struct {
 	re   *regexp.Regexp
 }
 
-func newRowSolver(line string) *rowSolver {
+func newRowSolver(line string, repeat int) *rowSolver {
 	parts := strings.Fields(line)
-	row := []byte(parts[0])
-	spec := findSpec(parts[1])
+	row := []byte(strings.Repeat(parts[0], repeat))
+	spec := findSpec(strings.Repeat(parts[1], repeat))
 	rs := rowSolver{row: row, spec: spec}
 	rs.buildRegex()
 	return &rs
