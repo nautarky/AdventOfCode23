@@ -3,7 +3,6 @@ package day12
 import (
 	"fmt"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
 )
@@ -53,8 +52,8 @@ func (rs *rowSolver) buildRegex() {
 	rs.re = regexp.MustCompile(sb.String())
 }
 
-func (rs *rowSolver) countArrangements(start int) int {
-	if !slices.Contains(rs.row, '?') {
+func (rs *rowSolver) countArrangements(i int) int {
+	if i == len(rs.row) {
 		if rs.re.Match(rs.row) {
 			return 1
 		} else {
@@ -62,17 +61,16 @@ func (rs *rowSolver) countArrangements(start int) int {
 		}
 	}
 
-	sum := 0
-
-	for i := start; i < len(rs.row); i++ {
-		if rs.row[i] == '?' {
-			rs.row[i] = '#'
-			sum += rs.countArrangements(i + 1)
-			rs.row[i] = '.'
-			sum += rs.countArrangements(i + 1)
-			rs.row[i] = '?'
-		}
+	if rs.row[i] != '?' {
+		return rs.countArrangements(i + 1)
 	}
+
+	sum := 0
+	rs.row[i] = '#'
+	sum += rs.countArrangements(i + 1)
+	rs.row[i] = '.'
+	sum += rs.countArrangements(i + 1)
+	rs.row[i] = '?'
 
 	return sum
 }
