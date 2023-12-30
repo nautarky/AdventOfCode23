@@ -12,11 +12,8 @@ func Part1(lines []string) int {
 	sum := 0
 
 	for _, line := range lines {
-		parts := strings.Fields(line)
-		spec := findSpec(parts[1])
-		re := buildRegex(spec)
-		re.MatchString(parts[0])
-		sum += countArrangements([]byte(parts[0]), 0, re)
+		rs := newRowSolver(line)
+		sum += rs.countArrangements(0)
 	}
 
 	return sum
@@ -26,19 +23,58 @@ func Part2(lines []string) int {
 	return 0
 }
 
-func buildRegex(spec []int) *regexp.Regexp {
+type rowSolver struct {
+	row  []byte
+	spec []int
+	re   *regexp.Regexp
+}
+
+func newRowSolver(line string) *rowSolver {
+	parts := strings.Fields(line)
+	row := []byte(parts[0])
+	spec := findSpec(parts[1])
+	rs := rowSolver{row: row, spec: spec}
+	rs.buildRegex()
+	return &rs
+}
+
+func (rs *rowSolver) buildRegex() {
 	var sb strings.Builder
 
 	sb.WriteString(`^\.*`)
-	for i, num := range spec {
+	for i, num := range rs.spec {
 		sb.WriteString(fmt.Sprintf("#{%d}", num))
-		if i != len(spec)-1 {
+		if i != len(rs.spec)-1 {
 			sb.WriteString(`\.+`)
 		}
 	}
 	sb.WriteString(`\.*$`)
 
-	return regexp.MustCompile(sb.String())
+	rs.re = regexp.MustCompile(sb.String())
+}
+
+func (rs *rowSolver) countArrangements(start int) int {
+	if !slices.Contains(rs.row, '?') {
+		if rs.re.Match(rs.row) {
+			return 1
+		} else {
+			return 0
+		}
+	}
+
+	sum := 0
+
+	for i := start; i < len(rs.row); i++ {
+		if rs.row[i] == '?' {
+			rs.row[i] = '#'
+			sum += rs.countArrangements(i + 1)
+			rs.row[i] = '.'
+			sum += rs.countArrangements(i + 1)
+			rs.row[i] = '?'
+		}
+	}
+
+	return sum
 }
 
 func findSpec(line string) []int {
@@ -52,28 +88,4 @@ func findSpec(line string) []int {
 	}
 
 	return output
-}
-
-func countArrangements(row []byte, start int, re *regexp.Regexp) int {
-	if !slices.Contains(row, '?') {
-		if re.Match(row) {
-			return 1
-		} else {
-			return 0
-		}
-	}
-
-	sum := 0
-
-	for i := start; i < len(row); i++ {
-		if row[i] == '?' {
-			row[i] = '#'
-			sum += countArrangements(row, i+1, re)
-			row[i] = '.'
-			sum += countArrangements(row, i+1, re)
-			row[i] = '?'
-		}
-	}
-
-	return sum
 }
