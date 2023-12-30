@@ -46,3 +46,13 @@ func ShoelaceTheorem(points []Point) float64 {
 func PicksTheoremI(a, b float64) float64 {
 	return -1 * (-a + (b / 2) - 1)
 }
+
+func SumIntSlice(ints []int) int {
+	sum := 0
+
+	for _, i := range ints {
+		sum += i
+	}
+
+	return sum
+}
