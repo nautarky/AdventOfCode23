@@ -1,10 +1,18 @@
 package day13
 
 func Part1(lines []string) int {
+	return solve(lines, 0)
+}
+
+func Part2(lines []string) int {
+	return solve(lines, 1)
+}
+
+func solve(lines []string, differences int) int {
 	grids := splitGrids(lines)
 	sum := 0
 	for _, g := range grids {
-		val, isCol := findSymmetry(g)
+		val, isCol := findSymmetry(g, differences)
 		if isCol {
 			sum += val
 		} else {
@@ -14,30 +22,31 @@ func Part1(lines []string) int {
 	return sum
 }
 
-func Part2(lines []string) int {
-	return 0
-}
-
 // returns (row/col preceding line, isCol?)
-func findSymmetry(grid []string) (int, bool) {
-	col := findSymmetricColumn(grid)
+func findSymmetry(grid []string, differences int) (int, bool) {
+	col := findSymmetricColumn(grid, differences)
 	if col != -1 {
 		return col, true
 	}
 
-	return findSymmetricRow(grid), false
+	return findSymmetricRow(grid, differences), false
 }
 
-func findSymmetricColumn(grid []string) int {
+func findSymmetricColumn(grid []string, differences int) int {
 	for l := 0; l < len(grid[0])-1; l++ {
 		isSymmetric := true
+		curDiff := differences
 
 		for _, row := range grid {
 			curL, curR := l, l+1
 
 			for isSymmetric && curL >= 0 && curR < len(grid[0]) {
 				if row[curL] != row[curR] {
-					isSymmetric = false
+					if curDiff == 0 {
+						isSymmetric = false
+					} else {
+						curDiff--
+					}
 				}
 
 				curL--
@@ -49,7 +58,7 @@ func findSymmetricColumn(grid []string) int {
 			}
 		}
 
-		if isSymmetric {
+		if isSymmetric && curDiff == 0 {
 			return l + 1
 		}
 	}
@@ -57,16 +66,21 @@ func findSymmetricColumn(grid []string) int {
 	return -1
 }
 
-func findSymmetricRow(grid []string) int {
+func findSymmetricRow(grid []string, differences int) int {
 	for n := 0; n < len(grid)-1; n++ {
 		isSymmetric := true
+		curDiff := differences
 
 		for col := 0; col < len(grid[0]); col++ {
 			curN, curS := n, n+1
 
 			for isSymmetric && curN >= 0 && curS < len(grid) {
 				if grid[curN][col] != grid[curS][col] {
-					isSymmetric = false
+					if curDiff == 0 {
+						isSymmetric = false
+					} else {
+						curDiff--
+					}
 				}
 
 				curN--
@@ -78,7 +92,7 @@ func findSymmetricRow(grid []string) int {
 			}
 		}
 
-		if isSymmetric {
+		if isSymmetric && curDiff == 0 {
 			return n + 1
 		}
 	}
