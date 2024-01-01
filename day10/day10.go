@@ -85,17 +85,17 @@ func (g *grid) findStart() (shared.Point, error) {
 func (g *grid) findPathsOut(p shared.Point) []shared.Point {
 	switch g.tiles[p.Y][p.X] {
 	case '|':
-		return []shared.Point{{p.X, p.Y - 1}, {p.X, p.Y + 1}}
+		return []shared.Point{{X: p.X, Y: p.Y - 1}, {X: p.X, Y: p.Y + 1}}
 	case '-':
-		return []shared.Point{{p.X - 1, p.Y}, {p.X + 1, p.Y}}
+		return []shared.Point{{X: p.X - 1, Y: p.Y}, {X: p.X + 1, Y: p.Y}}
 	case 'L':
-		return []shared.Point{{p.X, p.Y - 1}, {p.X + 1, p.Y}}
+		return []shared.Point{{X: p.X, Y: p.Y - 1}, {X: p.X + 1, Y: p.Y}}
 	case 'J':
-		return []shared.Point{{p.X, p.Y - 1}, {p.X - 1, p.Y}}
+		return []shared.Point{{X: p.X, Y: p.Y - 1}, {X: p.X - 1, Y: p.Y}}
 	case '7':
-		return []shared.Point{{p.X - 1, p.Y}, {p.X, p.Y + 1}}
+		return []shared.Point{{X: p.X - 1, Y: p.Y}, {X: p.X, Y: p.Y + 1}}
 	case 'F':
-		return []shared.Point{{p.X + 1, p.Y}, {p.X, p.Y + 1}}
+		return []shared.Point{{X: p.X + 1, Y: p.Y}, {X: p.X, Y: p.Y + 1}}
 	}
 
 	return []shared.Point{}
