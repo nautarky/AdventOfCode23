@@ -32,6 +32,16 @@ type Point struct {
 	Y int
 }
 
+type UnitVector struct {
+	X int
+	Y int
+}
+
+// ApplyUnitVector assumes 2d matrix positions. N->S: N+1
+func ApplyUnitVector(p Point, v UnitVector) Point {
+	return Point{p.X + v.X, p.Y + v.Y}
+}
+
 func ShoelaceTheorem(points []Point) float64 {
 	sum := 0.0
 	for i := 0; i < len(points); i++ {

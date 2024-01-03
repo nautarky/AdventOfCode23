@@ -8,6 +8,7 @@ import (
 	"Advent23/day13"
 	"Advent23/day14"
 	"Advent23/day15"
+	"Advent23/day16"
 	"Advent23/day2"
 	"Advent23/day3"
 	"Advent23/day4"
@@ -36,6 +37,7 @@ func main() {
 	printOutput("input/13.txt", day13.Part1, day13.Part2, 13)
 	printOutput("input/14.txt", day14.Part1, day14.Part2, 14)
 	printOutput("input/15.txt", day15.Part1, day15.Part2, 15)
+	printOutput("input/16.txt", day16.Part1, day16.Part2, 16)
 }
 
 type solution func([]string) int
