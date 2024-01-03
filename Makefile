@@ -21,3 +21,7 @@ build: vet
 run: vet
 	go run $(sources)
 .PHONY:run
+
+debug:
+	go run $(sources)
+.PHONY:debug
