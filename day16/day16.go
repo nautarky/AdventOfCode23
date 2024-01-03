@@ -7,6 +7,40 @@ import (
 
 func Part1(lines []string) int {
 	lights := []light{{p: shared.Point{X: 0, Y: 0}, v: shared.UnitVector{X: 1, Y: 0}}}
+	return solve(lines, lights)
+}
+
+func Part2(lines []string) int {
+	maxEnergy := 0
+
+	// top row, going down
+	for i := 0; i < len(lines[0]); i++ {
+		lights := []light{{p: shared.Point{X: i, Y: 0}, v: shared.UnitVector{X: 0, Y: 1}}}
+		maxEnergy = max(maxEnergy, solve(lines, lights))
+	}
+
+	// bottom row, going up
+	for i := 0; i < len(lines[0]); i++ {
+		lights := []light{{p: shared.Point{X: i, Y: len(lines) - 1}, v: shared.UnitVector{X: 0, Y: -1}}}
+		maxEnergy = max(maxEnergy, solve(lines, lights))
+	}
+
+	// left column, going right
+	for i := 0; i < len(lines); i++ {
+		lights := []light{{p: shared.Point{X: 0, Y: i}, v: shared.UnitVector{X: 1, Y: 0}}}
+		maxEnergy = max(maxEnergy, solve(lines, lights))
+	}
+
+	// right column, going left
+	for i := 0; i < len(lines); i++ {
+		lights := []light{{p: shared.Point{X: len(lines[0]) - 1, Y: i}, v: shared.UnitVector{X: -1, Y: 0}}}
+		maxEnergy = max(maxEnergy, solve(lines, lights))
+	}
+
+	return maxEnergy
+}
+
+func solve(lines []string, lights []light) int {
 	visited := make(map[light]bool)
 	energized := make(map[shared.Point]bool)
 
@@ -26,10 +60,6 @@ func Part1(lines []string) int {
 	}
 
 	return len(energized)
-}
-
-func Part2(lines []string) int {
-	return 0
 }
 
 type light struct {
