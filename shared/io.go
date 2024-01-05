@@ -38,3 +38,9 @@ func RuneToInt(r rune) (int, error) {
 
 	return int(r - '0'), nil
 }
+
+func PrintNestedSliceInt(s [][]int) {
+	for _, row := range s {
+		fmt.Println(row)
+	}
+}
