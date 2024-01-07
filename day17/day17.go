@@ -2,7 +2,6 @@ package day17
 
 import (
 	"container/heap"
-	"fmt"
 	"math"
 )
 
@@ -30,16 +29,12 @@ func (s *solution) dijkstra() int {
 		neighbors := s.unvisitedNeighbors(c.itemKey)
 
 		for _, n := range neighbors {
-			tile := s.tiles[c.value]
+			tile := s.tiles[n.value]
 			item := s.items[n]
 
 			if c.priority+tile < item.priority {
 				s.costs.Update(item, c.priority+tile)
 			}
-
-			fmt.Println(c)
-			fmt.Println(item)
-			fmt.Println("----------")
 		}
 
 		if c.value == s.dest {
