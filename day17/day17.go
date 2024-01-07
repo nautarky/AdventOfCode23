@@ -6,12 +6,13 @@ import (
 )
 
 func Part1(lines []string) int {
-	sol := newSolution(lines)
+	sol := newSolution(lines, 1, 3)
 	return sol.dijkstra()
 }
 
 func Part2(lines []string) int {
-	return 0
+	sol := newSolution(lines, 4, 10)
+	return sol.dijkstra()
 }
 
 type solution struct {
@@ -21,6 +22,8 @@ type solution struct {
 	costs      priorityQueueItemComplex64
 	dest       complex64
 	directions []complex64
+	minStreak  int
+	maxStreak  int
 }
 
 func (s *solution) dijkstra() int {
@@ -37,7 +40,7 @@ func (s *solution) dijkstra() int {
 			}
 		}
 
-		if c.value == s.dest {
+		if c.value == s.dest && c.streak >= s.minStreak {
 			return c.priority
 		}
 		s.visited[c.itemKey] = true
@@ -57,6 +60,10 @@ func (s *solution) unvisitedNeighbors(node itemKey) []itemKey {
 			continue
 		}
 
+		if d != node.direction && node.streak < s.minStreak {
+			continue
+		}
+
 		streak := 1
 		if d == node.direction {
 			streak = node.streak + 1
@@ -65,7 +72,7 @@ func (s *solution) unvisitedNeighbors(node itemKey) []itemKey {
 		key := itemKey{value, d, streak}
 		seen := s.visited[key]
 
-		if streak > 3 || seen {
+		if streak > s.maxStreak || seen {
 			continue
 		}
 
@@ -75,7 +82,7 @@ func (s *solution) unvisitedNeighbors(node itemKey) []itemKey {
 	return neighbors
 }
 
-func newSolution(lines []string) solution {
+func newSolution(lines []string, minStreak, maxStreak int) solution {
 	tiles := make(map[complex64]int)
 	items := make(map[itemKey]*queueItem)
 	costs := make(priorityQueueItemComplex64, 0)
@@ -88,11 +95,11 @@ func newSolution(lines []string) solution {
 			tiles[value] = int(val - '0')
 
 			for _, d := range directions {
-				for streak := 1; streak < 4; streak++ {
+				for streak := 1; streak < maxStreak+1; streak++ {
 					key := itemKey{value, d, streak}
 					item := &queueItem{itemKey: key, priority: math.MaxInt}
 					visited[key] = false
-					if key.value == 0 {
+					if key.value == 0 && streak == 1 {
 						item.priority = 0
 						visited[key] = true
 					}
@@ -104,7 +111,7 @@ func newSolution(lines []string) solution {
 		}
 	}
 
-	return solution{tiles, visited, items, costs, complex(float32(len(lines)-1), float32(len(lines[0])-1)), directions}
+	return solution{tiles, visited, items, costs, complex(float32(len(lines)-1), float32(len(lines[0])-1)), directions, minStreak, maxStreak}
 }
 
 type itemKey struct {
