@@ -4,12 +4,11 @@ import (
 	"container/heap"
 	"fmt"
 	"math"
-	"slices"
 )
 
 func Part1(lines []string) int {
 	sol := newSolution(lines)
-	return sol.dijkstra(complex(0, 0))
+	return sol.dijkstra()
 }
 
 func Part2(lines []string) int {
@@ -17,21 +16,21 @@ func Part2(lines []string) int {
 }
 
 type solution struct {
-	tiles   map[complex64]int
-	visited map[complex64]bool
-	items   map[complex64]*itemComplex64
-	costs   priorityQueueItemComplex64
-	dest    complex64
+	tiles      map[complex64]int
+	visited    map[itemKey]bool
+	items      map[itemKey]*queueItem
+	costs      priorityQueueItemComplex64
+	dest       complex64
+	directions []complex64
 }
 
-func (s *solution) dijkstra(src complex64) int {
-	c := heap.Pop(&s.costs).(*itemComplex64)
-	neighbors := []complex64{complex(1, 0), complex(0, 1)}
-	prev := complex64(complex(-1, -1))
-
+func (s *solution) dijkstra() int {
 	for {
+		c := heap.Pop(&s.costs).(*queueItem)
+		neighbors := s.unvisitedNeighbors(c.itemKey)
+
 		for _, n := range neighbors {
-			tile := s.tiles[n]
+			tile := s.tiles[c.value]
 			item := s.items[n]
 
 			if c.priority+tile < item.priority {
@@ -46,71 +45,88 @@ func (s *solution) dijkstra(src complex64) int {
 		if c.value == s.dest {
 			return c.priority
 		}
-		s.visited[c.value] = true
-
-		prev = c.value
-		c = heap.Pop(&s.costs).(*itemComplex64)
-		neighbors = s.unvisitedNeighbors(c.value, prev)
+		s.visited[c.itemKey] = true
 	}
 }
 
-func (s *solution) unvisitedNeighbors(node, prev complex64) []complex64 {
-	neighbors := make([]complex64, 0)
-	diff := node - prev
+func (s *solution) unvisitedNeighbors(node itemKey) []itemKey {
+	neighbors := make([]itemKey, 0)
 
-	if real(diff) != 0 {
-		// going vertically
-		neighbors = append(neighbors, node+complex(1, 0), node+complex(-1, 0))
-	} else {
-		// going horizontally
-		neighbors = append(neighbors, node+complex(0, 1), node+complex(0, -1))
+	for _, d := range s.directions {
+		// find position of moving in this direction
+		value := node.value + d
+
+		// dont go out of bounds or backwards
+		_, ok := s.tiles[value]
+		if !ok || d == -1*node.direction {
+			continue
+		}
+
+		streak := 1
+		if d == node.direction {
+			streak = node.streak + 1
+		}
+
+		key := itemKey{value, d, streak}
+		seen := s.visited[key]
+
+		if streak > 3 || seen {
+			continue
+		}
+
+		neighbors = append(neighbors, itemKey{node.value + d, d, streak})
 	}
 
-	return slices.DeleteFunc(neighbors, func(n complex64) bool {
-		visited, ok := s.visited[n]
-		return visited || !ok
-	})
+	return neighbors
 }
 
 func newSolution(lines []string) solution {
 	tiles := make(map[complex64]int)
-	items := make(map[complex64]*itemComplex64)
+	items := make(map[itemKey]*queueItem)
 	costs := make(priorityQueueItemComplex64, 0)
-	visited := make(map[complex64]bool)
+	visited := make(map[itemKey]bool)
+	directions := []complex64{complex(-1, 0), complex(1, 0), complex(0, -1), complex(0, 1)}
 
 	for i, line := range lines {
 		for j, val := range line {
 			value := complex(float32(i), float32(j))
 			tiles[value] = int(val - '0')
 
-			var item *itemComplex64
-			if i == 0 && j == 0 {
-				visited[complex(float32(i), float32(j))] = true
-				item = &itemComplex64{value: value, priority: 0}
-			} else {
-				visited[complex(float32(i), float32(j))] = false
-				item = &itemComplex64{value: value, priority: math.MaxInt}
-			}
+			for _, d := range directions {
+				for streak := 1; streak < 4; streak++ {
+					key := itemKey{value, d, streak}
+					item := &queueItem{itemKey: key, priority: math.MaxInt}
+					visited[key] = false
+					if key.value == 0 {
+						item.priority = 0
+						visited[key] = true
+					}
 
-			items[value] = item
-			heap.Push(&costs, item)
+					items[key] = item
+					heap.Push(&costs, item)
+				}
+			}
 		}
 	}
 
-	return solution{tiles, visited, items, costs, complex(float32(len(lines)-1), float32(len(lines[0])-1))}
+	return solution{tiles, visited, items, costs, complex(float32(len(lines)-1), float32(len(lines[0])-1)), directions}
 }
 
-// An itemComplex64 is something we manage in a priority queue.
-type itemComplex64 struct {
-	value     complex64 // The value of the item; arbitrary.
+type itemKey struct {
+	value     complex64
 	direction complex64
 	streak    int
-	priority  int // The priority of the item in the queue.
-	index     int // The index of the item in the heap. Needed by update and is maintained by the heap.Interface methods.
+}
+
+// An queueItem is something we manage in a priority queue.
+type queueItem struct {
+	itemKey
+	priority int // The priority of the item in the queue.
+	index    int // The index of the item in the heap. Needed by update and is maintained by the heap.Interface methods.
 }
 
 // A priorityQueueItemComplex64 implements heap.Interface and holds Items.
-type priorityQueueItemComplex64 []*itemComplex64
+type priorityQueueItemComplex64 []*queueItem
 
 func (pq priorityQueueItemComplex64) Len() int { return len(pq) }
 
@@ -127,7 +143,7 @@ func (pq priorityQueueItemComplex64) Swap(i, j int) {
 
 func (pq *priorityQueueItemComplex64) Push(x any) {
 	n := len(*pq)
-	item := x.(*itemComplex64)
+	item := x.(*queueItem)
 	item.index = n
 	*pq = append(*pq, item)
 }
@@ -143,7 +159,7 @@ func (pq *priorityQueueItemComplex64) Pop() any {
 }
 
 // update modifies the priority of an Item in the queue.
-func (pq *priorityQueueItemComplex64) Update(item *itemComplex64, priority int) {
+func (pq *priorityQueueItemComplex64) Update(item *queueItem, priority int) {
 	item.priority = priority
 	heap.Fix(pq, item.index)
 }
