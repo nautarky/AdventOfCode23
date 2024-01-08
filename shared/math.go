@@ -44,14 +44,18 @@ func ApplyUnitVector(p Point, v UnitVector) Point {
 	return Point{p.X + v.X, p.Y + v.Y}
 }
 
-func ShoelaceComplex(points []complex64) float64 {
-	sum := 0.0
+func ShoelaceComplex(points []complex64) int {
+	sum := 0
 	for i := 0; i < len(points); i++ {
 		p1, p2 := points[i], points[(i+1)%len(points)]
-		sum += float64(real(p1)*imag(p2)) - float64(imag(p1)*real(p2))
+		sum += int(real(p1))*int(imag(p2)) - int(imag(p1))*int(real(p2))
 	}
 
-	return math.Abs(sum / 2.0)
+	sum /= 2
+	if sum < 0 {
+		return -sum
+	}
+	return sum
 }
 
 func ShoelaceTheorem(points []Point) float64 {
@@ -62,6 +66,11 @@ func ShoelaceTheorem(points []Point) float64 {
 	}
 
 	return math.Abs(sum / 2.0)
+}
+
+// PicksTheoremI solves for I
+func PicksTheoremIInt(a, b int) int {
+	return -1 * (-a + (b / 2) - 1)
 }
 
 // PicksTheoremI solves for I
