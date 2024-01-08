@@ -2,7 +2,6 @@ package day18
 
 import (
 	"Advent23/shared"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -18,9 +17,9 @@ func Part2(lines []string) int {
 }
 
 func solve(instructions []instruction) int {
-	points := []complex64{}
+	points := make([]complex128, 0)
 
-	var cur complex64 = complex(0, 0)
+	var cur complex128 = complex(0, 0)
 	for _, ins := range instructions {
 		for i := 0; i < ins.length; i++ {
 			cur += ins.direction
@@ -30,7 +29,6 @@ func solve(instructions []instruction) int {
 
 	area := shared.ShoelaceComplex(points)
 	picks := shared.PicksTheoremIInt(area, len(points))
-	fmt.Println(len(points))
 	return len(points) + int(picks)
 }
 
@@ -58,7 +56,7 @@ func parseInstructions2(lines []string) []instruction {
 	return instructions
 }
 
-func dirToComplex(dirS string, dirI int) complex64 {
+func dirToComplex(dirS string, dirI int) complex128 {
 	switch dirS {
 	case "R":
 		return complex(1, 0)
@@ -83,6 +81,6 @@ func dirToComplex(dirS string, dirI int) complex64 {
 }
 
 type instruction struct {
-	direction complex64
+	direction complex128
 	length    int
 }

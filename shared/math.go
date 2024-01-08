@@ -44,7 +44,7 @@ func ApplyUnitVector(p Point, v UnitVector) Point {
 	return Point{p.X + v.X, p.Y + v.Y}
 }
 
-func ShoelaceComplex(points []complex64) int {
+func ShoelaceComplex(points []complex128) int {
 	sum := 0
 	for i := 0; i < len(points); i++ {
 		p1, p2 := points[i], points[(i+1)%len(points)]
